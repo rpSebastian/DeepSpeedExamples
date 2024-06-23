@@ -16,10 +16,10 @@ class PromptRawDataset(object):
         self.output_path = output_path
         self.seed = seed
         self.local_rank = local_rank
-        if os.path.exists(dataset_name):
-            self.raw_datasets = load_from_disk(dataset_name)
-        elif not dataset_name == 'local/jsonfile':
-            self.raw_datasets = load_dataset(dataset_name)
+        # if os.path.exists(dataset_name):
+        #     self.raw_datasets = load_dataset(dataset_name)
+        # elif not dataset_name == 'local/jsonfile':
+        self.raw_datasets = load_dataset(dataset_name)
 
     def get_train_data(self):
         return
@@ -51,7 +51,7 @@ class PromptRawDataset(object):
 class DahoasRmstaticDataset(PromptRawDataset):
 
     def __init__(self, output_path, seed, local_rank, dataset_name):
-        super().__init__(output_path, seed, local_rank, dataset_name)
+        super().__init__(output_path, seed, local_rank, "/home/xuhang/hf_hub/rm-static")
         self.dataset_name = "Dahoas/rm-static"
         self.dataset_name_clean = "Dahoas_rm_static"
 
