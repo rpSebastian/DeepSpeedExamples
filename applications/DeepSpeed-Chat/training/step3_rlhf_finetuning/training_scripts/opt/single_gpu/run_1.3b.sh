@@ -27,10 +27,12 @@ mkdir -p $OUTPUT
 #    --output_dir $OUTPUT &> $OUTPUT/training.log
 
 
-deepspeed --include="localhost:1,2" main.py \
+deepspeed --include="localhost:1" main.py \
    --actor_model_name_or_path /home/xuhang/hf_hub/opt-350m --critic_model_name_or_path /home/xuhang/hf_hub/opt-350m \
    --actor_zero_stage 0 --critic_zero_stage 0 \
    --num_padding_at_beginning 1 --gradient_accumulation_steps 2 \
    --deepspeed --actor_lora_dim 128 --enable_hybrid_engine --actor_gradient_checkpointing --actor_dropout 0.0 \
-   --output_dir ./output
+   --output_dir ./output \
+   --per_device_generation_batch_size 8 \
+   --per_device_training_batch_size 8 \
 #    &> $OUTPUT/training.log
