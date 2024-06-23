@@ -15,8 +15,16 @@ if [ "$ZERO_STAGE" == "" ]; then
 fi
 mkdir -p $OUTPUT
 
-deepspeed --num_gpus 1 main.py --model_name_or_path facebook/opt-1.3b \
-   --gradient_accumulation_steps 8 --lora_dim 128 --zero_stage $ZERO_STAGE \
+# deepspeed --num_gpus 1 main.py --model_name_or_path facebook/opt-1.3b \
+#    --gradient_accumulation_steps 8 --lora_dim 128 --zero_stage $ZERO_STAGE \
+#    --enable_tensorboard \
+#    --tensorboard_path $OUTPUT \
+#    --deepspeed --output_dir $OUTPUT &> $OUTPUT/training.log
+
+
+deepspeed --include="localhost:1,2" main.py --model_name_or_path /home/xuhang/hf_hub/opt-350m \
+   --gradient_accumulation_steps 8 --lora_dim 128 --zero_stage 0 \
    --enable_tensorboard \
-   --tensorboard_path $OUTPUT \
-   --deepspeed --output_dir $OUTPUT &> $OUTPUT/training.log
+   --tensorboard_path ./output \
+   --deepspeed --output_dir ./output \
+   --per_device_train_batch_size 8
