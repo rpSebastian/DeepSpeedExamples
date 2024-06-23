@@ -130,3 +130,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 applications/DeepSpeed-Chat/training/step1_supervised_finetuning/output/*
+applications/DeepSpeed-Chat/training/step2_reward_model_finetuning/output/*
