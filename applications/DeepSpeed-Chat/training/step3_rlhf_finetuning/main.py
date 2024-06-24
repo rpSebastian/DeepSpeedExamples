@@ -489,6 +489,7 @@ def main():
         rlhf_engine.actor.optimizer.quantize_nontrainable_params()
         print_rank_0("Mixed Precision ZeRO++ enabled")
 
+    # unsupervised_training_enabled下进行无监督数据辅助训练
     ppo_trainer = DeepSpeedPPOTrainerUnsupervised if unsupervised_training_enabled else DeepSpeedPPOTrainer
     trainer = ppo_trainer(rlhf_engine, args)
 

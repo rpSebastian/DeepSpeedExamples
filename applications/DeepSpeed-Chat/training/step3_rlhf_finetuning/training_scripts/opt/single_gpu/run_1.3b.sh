@@ -35,4 +35,6 @@ deepspeed --include="localhost:1" main.py \
    --output_dir ./output \
    --per_device_generation_batch_size 8 \
    --per_device_training_batch_size 8 \
+    --enable_tensorboard \
+    --tensorboard_path ./output
 #    &> $OUTPUT/training.log

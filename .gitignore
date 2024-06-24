@@ -131,3 +131,4 @@ dmypy.json
 .pyre/
 applications/DeepSpeed-Chat/training/step1_supervised_finetuning/output/*
 applications/DeepSpeed-Chat/training/step2_reward_model_finetuning/output/*
+applications/DeepSpeed-Chat/training/step3_rlhf_finetuning/output/*

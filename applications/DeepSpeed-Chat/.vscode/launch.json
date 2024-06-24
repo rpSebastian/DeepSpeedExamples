@@ -8,7 +8,7 @@
             "name": "sft",
             "type": "debugpy",
             "request": "launch",
-            "program": "/home/xuhang/miniconda3/envs/main/bin/deepspeed",
+            "program": "/home/xuhang/miniconda3/envs/deepspeed/bin/deepspeed",
             "console": "integratedTerminal",
             "justMyCode": true,
             // "env": {
@@ -35,6 +35,53 @@
                 "--deepspeed",
                 "--output_dir",
                 "./training/step1_supervised_finetuning/output"
+            ]
+        },
+        {
+            "name": "rlhf",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/xuhang/miniconda3/envs/deepspeed/bin/deepspeed",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            // "env": {
+            //     "NCCL_P2P_DISABLE": "1",
+            //     "NCCL_IB_DISABLE": "1",
+            //     "CUDA_DEVICE_MAX_CONNECTIONS": "2",
+            //     "CUDA_VISIBLE_DEVICES": "1,3"
+            // },
+            "args": [
+                "--include",
+                "localhost:1",
+                "training/step3_rlhf_finetuning/main.py",
+                "--actor_model_name_or_path",
+                "/home/xuhang/hf_hub/opt-350m",
+                "--critic_model_name_or_path",
+                "/home/xuhang/hf_hub/opt-350m",
+                "--actor_zero_stage",
+                "0",
+                "--critic_zero_stage",
+                "0",
+                "--num_padding_at_beginning",
+                "1",
+                "--gradient_accumulation_steps",
+                "2",
+                "--deepspeed",
+                "--actor_lora_dim",
+                "128",
+                "--enable_hybrid_engine",
+                "--actor_gradient_checkpointing",
+                "--actor_dropout",
+                "0.0",
+                "--output_dir",
+                "./training/step3_rlhf_finetuning/output",
+                "--per_device_generation_batch_size",
+                "8",
+                "--per_device_training_batch_size",
+                "8",
+                "--enable_tensorboard",
+                "--tensorboard_path",
+                "./training/step3_rlhf_finetuning/output",
             ]
         }
     ]
