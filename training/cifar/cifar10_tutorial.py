@@ -71,7 +71,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-trainset = torchvision.datasets.CIFAR10(root='./data',
+trainset = torchvision.datasets.CIFAR10(root='/data1/xuhang/hf_hub/cifar10',
                                         train=True,
                                         download=True,
                                         transform=transform)
@@ -80,7 +80,7 @@ trainloader = torch.utils.data.DataLoader(trainset,
                                           shuffle=True,
                                           num_workers=2)
 
-testset = torchvision.datasets.CIFAR10(root='./data',
+testset = torchvision.datasets.CIFAR10(root='/data1/xuhang/hf_hub/cifar10',
                                        train=False,
                                        download=True,
                                        transform=transform)
@@ -113,7 +113,7 @@ dataiter = iter(trainloader)
 images, labels = next(dataiter)
 
 # show images
-imshow(torchvision.utils.make_grid(images))
+# imshow(torchvision.utils.make_grid(images))
 # print labels
 print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
 
@@ -222,7 +222,7 @@ dataiter = iter(testloader)
 images, labels = next(dataiter)
 
 # print images
-imshow(torchvision.utils.make_grid(images))
+# imshow(torchvision.utils.make_grid(images))
 print('GroundTruth: ', ' '.join('%5s' % classes[labels[j]] for j in range(4)))
 
 ########################################################################

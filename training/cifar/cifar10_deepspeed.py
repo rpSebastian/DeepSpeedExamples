@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 import deepspeed
 import torch
@@ -8,6 +9,11 @@ import torchvision
 import torchvision.transforms as transforms
 from deepspeed.accelerator import get_accelerator
 from deepspeed.moe.utils import split_params_into_different_moe_groups_for_optimizer
+
+deepspeed_logger = logging.getLogger("DeepSpeed")
+deepspeed_logger.setLevel(logging.WARNING)
+for hdl in deepspeed_logger.handlers:
+    hdl.setLevel(logging.WARNING)
 
 
 def add_argument():
@@ -37,7 +43,7 @@ def add_argument():
     # For mixed precision training.
     parser.add_argument(
         "--dtype",
-        default="fp16",
+        default="bf16",
         type=str,
         choices=["bf16", "fp16", "fp32"],
         help="Datatype used for training",
@@ -116,14 +122,12 @@ def create_moe_param_groups(model):
 def get_ds_config(args):
     """Get the DeepSpeed configuration dictionary."""
     ds_config = {
-        "train_batch_size": 16,
+        "train_micro_batch_size_per_gpu": 128,
         "steps_per_print": 2000,
         "optimizer": {
             "type": "Adam",
             "params": {
                 "lr": 0.001,
-                "betas": [0.8, 0.999],
-                "eps": 1e-8,
                 "weight_decay": 3e-7,
             },
         },
@@ -149,15 +153,28 @@ def get_ds_config(args):
         },
         "wall_clock_breakdown": False,
         "zero_optimization": {
-            "stage": args.stage,
-            "allgather_partitions": True,
-            "reduce_scatter": True,
-            "allgather_bucket_size": 50000000,
-            "reduce_bucket_size": 50000000,
+            "stage": 0,
             "overlap_comm": True,
-            "contiguous_gradients": True,
-            "cpu_offload": False,
         },
+        # "tensorboard": {
+        #     "enabled": True,
+        #     "output_path": "./logs",
+        #     "job_name": "train_cifar",
+        # },
+        # "wandb": {"enabled": True, "project": "deepspeed", "group": "train_cifar"},
+        # "csv_monitor": {
+        #     "enabled": True,
+        #     "output_path": "./logs",
+        #     "job_name": "train_cifar",
+        # },
+        # "flops_profiler": {
+        #     "enabled": True,
+        #     "profile_step": 1,
+        #     "module_depth": -1,
+        #     "top_modules": 1,
+        #     "detailed": True,
+        #     "output_file": "./profile.txt",
+        # },
     }
     return ds_config
 
@@ -278,7 +295,7 @@ def test(model_engine, testset, local_device, target_dtype, test_batch_size=4):
 
 def main(args):
     # Initialize DeepSpeed distributed backend.
-    deepspeed.init_distributed()
+    deepspeed.init_distributed(verbose=False)
 
     ########################################################################
     # Step1. Data Preparation.
@@ -300,10 +317,16 @@ def main(args):
 
     # Load or download cifar data.
     trainset = torchvision.datasets.CIFAR10(
-        root="./data", train=True, download=True, transform=transform
+        root="/data1/xuhang/hf_hub/cifar10",
+        train=True,
+        download=True,
+        transform=transform,
     )
     testset = torchvision.datasets.CIFAR10(
-        root="./data", train=False, download=True, transform=transform
+        root="/data1/xuhang/hf_hub/cifar10",
+        train=False,
+        download=True,
+        transform=transform,
     )
 
     if torch.distributed.get_rank() == 0:
@@ -363,6 +386,7 @@ def main(args):
 
     for epoch in range(args.epochs):  # loop over the dataset multiple times
         running_loss = 0.0
+        running_times = 0
         for i, data in enumerate(trainloader):
             # Get the inputs. ``data`` is a list of [inputs, labels].
             inputs, labels = data[0].to(local_device), data[1].to(local_device)
@@ -379,13 +403,12 @@ def main(args):
 
             # Print statistics
             running_loss += loss.item()
-            if local_rank == 0 and i % args.log_interval == (
-                args.log_interval - 1
-            ):  # Print every log_interval mini-batches.
-                print(
-                    f"[{epoch + 1 : d}, {i + 1 : 5d}] loss: {running_loss / args.log_interval : .3f}"
-                )
-                running_loss = 0.0
+            running_times += 1
+
+        if local_rank == 0:
+            print(f"[{epoch + 1 : d}, loss: {running_loss / running_times : .3f}")
+            running_loss = 0.0
+            running_times = 0
     print("Finished Training")
 
     ########################################################################

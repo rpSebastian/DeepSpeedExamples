@@ -3,7 +3,7 @@
 # Number of nodes
 NUM_NODES=1
 # Number of GPUs per node
-NUM_GPUS=2
+NUM_GPUS=8
 # Size of expert parallel world (should be less than total world size)
 EP_SIZE=2
 # Number of total experts
