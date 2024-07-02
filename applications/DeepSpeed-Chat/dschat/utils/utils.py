@@ -15,7 +15,7 @@ import torch.nn as nn
 from datetime import datetime
 
 def print_rank_0(msg, rank=None):
-    now = datetime.now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     if rank is not None and rank <= 0:
         print(f"[{now}] {msg}")
     elif is_rank_0():
