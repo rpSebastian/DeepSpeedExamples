@@ -357,15 +357,15 @@ def main():
             outputs = model(**batch, use_cache=False)
             loss = outputs.loss
             if args.print_loss:
-                print(
-                    f"Epoch: {epoch}, Step: {step}, Rank: {torch.distributed.get_rank()}, loss = {loss}"
+                print_rank_0(
+                    f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)}, Rank: {torch.distributed.get_rank()}, loss = {loss}"
                 )
             model.backward(loss)
             model.step()
             end = time.time()
-            if torch.distributed.get_rank() == 0:
-                print_throughput(model.model, args, end - start,
-                                 args.global_rank)
+            # if torch.distributed.get_rank() == 0:
+            #     print_throughput(model.model, args, end - start,
+            #                      args.global_rank)
 
         # Evaluate perplexity on the validation set.
         print_rank_0(
@@ -375,19 +375,19 @@ def main():
         print_rank_0(f"ppl: {perplexity}, loss: {eval_loss}", args.global_rank)
         model.tput_timer.update_epoch_count()
 
-    if args.output_dir is not None:
-        print_rank_0('saving the final model ...', args.global_rank)
-        model = convert_lora_to_linear_layer(model)
+        if args.output_dir is not None:
+            print_rank_0('saving the final model ...', args.global_rank)
+            model = convert_lora_to_linear_layer(model)
 
-        if args.global_rank == 0:
-            save_hf_format(model, tokenizer, args)
+            if args.global_rank == 0:
+                save_hf_format(model, tokenizer, args, sub_folder=f"epoch_{epoch}")
 
-        if args.zero_stage == 3:
-            # For zero stage 3, each gpu only has a part of the model, so we need a special save function
-            save_zero_three_model(model,
-                                  args.global_rank,
-                                  args.output_dir,
-                                  zero_stage=args.zero_stage)
+            if args.zero_stage == 3:
+                # For zero stage 3, each gpu only has a part of the model, so we need a special save function
+                save_zero_three_model(model,
+                                    args.global_rank,
+                                    args.output_dir,
+                                    zero_stage=args.zero_stage)
 
 
 if __name__ == "__main__":

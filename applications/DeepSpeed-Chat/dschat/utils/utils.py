@@ -19,7 +19,7 @@ def print_rank_0(msg, rank=None):
     if rank is not None and rank <= 0:
         print(f"[{now}] {msg}")
     elif is_rank_0():
-        print(msg)
+        print(f"[{now}] {msg}")
 
 
 def is_rank_0():
