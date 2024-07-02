@@ -167,14 +167,14 @@ def get_ds_config(args):
         #     "output_path": "./logs",
         #     "job_name": "train_cifar",
         # },
-        # "flops_profiler": {
-        #     "enabled": True,
-        #     "profile_step": 1,
-        #     "module_depth": -1,
-        #     "top_modules": 1,
-        #     "detailed": True,
-        #     "output_file": "./profile.txt",
-        # },
+        "flops_profiler": {
+            "enabled": True,
+            "profile_step": 1,
+            "module_depth": -1,
+            "top_modules": 1,
+            "detailed": True,
+            "output_file": "./profile.txt",
+        },
     }
     return ds_config
 
