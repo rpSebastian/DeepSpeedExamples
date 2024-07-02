@@ -12,11 +12,12 @@ import deepspeed
 from deepspeed.runtime.zero.partition_parameters import ZeroParamStatus
 from deepspeed.accelerator import get_accelerator
 import torch.nn as nn
-
+from datetime import datetime
 
 def print_rank_0(msg, rank=None):
+    now = datetime.now.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     if rank is not None and rank <= 0:
-        print(msg)
+        print(f"[{now}] {msg}")
     elif is_rank_0():
         print(msg)
 
