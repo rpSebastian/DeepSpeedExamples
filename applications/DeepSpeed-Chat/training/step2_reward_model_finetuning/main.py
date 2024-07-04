@@ -396,9 +396,10 @@ def main():
             gas_boundary = (total_micro_steps %
                             args.gradient_accumulation_steps == 0)
             total_steps = total_micro_steps // args.gradient_accumulation_steps
+            print_rank_0(f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)}, mean_loss: {mean_loss}")
             if args.eval_interval and gas_boundary and (
                     total_steps % args.eval_interval == 0):
-                print_rank_0(f"Iter {total_steps}: Evaluating reward",
+                print_rank_0(f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)} Iter {total_steps}: Evaluating reward",
                              args.global_rank)
                 reward_score, reject_score, acc = evaluation_reward(
                     rm_model, eval_dataloader, args.eval_iters)
@@ -423,18 +424,18 @@ def main():
             f"acc (higher is better) : {acc}", args.global_rank)
         rm_model.tput_timer.update_epoch_count()
 
-    if args.output_dir is not None:
-        print_rank_0('saving model ...', args.global_rank)
-        rm_model = convert_lora_to_linear_layer(rm_model)
+        if args.output_dir is not None:
+            print_rank_0('saving model ...', args.global_rank)
+            rm_model = convert_lora_to_linear_layer(rm_model)
 
-        if args.global_rank == 0:
-            save_hf_format(rm_model, tokenizer, args)
-        if args.zero_stage == 3:
-            # for zero stage 3, each gpu only has a part of the model, so we need to save the model on each gpu by using DS-Engine
-            save_zero_three_model(rm_model,
-                                  args.global_rank,
-                                  args.output_dir,
-                                  zero_stage=args.zero_stage)
+            if args.global_rank == 0:
+                save_hf_format(rm_model, tokenizer, args, sub_folder=f"epoch_{epoch}")
+            if args.zero_stage == 3:
+                # for zero stage 3, each gpu only has a part of the model, so we need to save the model on each gpu by using DS-Engine
+                save_zero_three_model(rm_model,
+                                    args.global_rank,
+                                    args.output_dir,
+                                    zero_stage=args.zero_stage)
 
 
 if __name__ == "__main__":
