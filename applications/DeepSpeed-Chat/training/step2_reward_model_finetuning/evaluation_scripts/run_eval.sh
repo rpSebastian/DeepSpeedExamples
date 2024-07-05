@@ -6,4 +6,4 @@
 
 # Add the path to the finetuned model
 python  rw_eval.py \
-    --model_name_or_path /home/xuhang/data/model/opt-350m
+    --model_name_or_path /data1/xuhang/hf_hub/model/chat-opt-350m-reward-deepspeed

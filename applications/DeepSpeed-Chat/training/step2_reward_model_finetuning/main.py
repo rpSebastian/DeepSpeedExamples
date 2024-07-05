@@ -396,7 +396,7 @@ def main():
             gas_boundary = (total_micro_steps %
                             args.gradient_accumulation_steps == 0)
             total_steps = total_micro_steps // args.gradient_accumulation_steps
-            print_rank_0(f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)}, mean_loss: {mean_loss}")
+            print_rank_0(f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)}, mean_loss: {mean_loss/(step+1)}")
             if args.eval_interval and gas_boundary and (
                     total_steps % args.eval_interval == 0):
                 print_rank_0(f"Epoch: {epoch}/{args.num_train_epochs}, Step: {step}/{len(train_dataloader)} Iter {total_steps}: Evaluating reward",
